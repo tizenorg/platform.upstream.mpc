@@ -1,21 +1,4 @@
-#
-# spec file for package mpc
-#
-# Copyright (c) 2012 SUSE LINUX Products GmbH, Nuernberg, Germany.
-#
-# All modifications and additions to the file contributed by third parties
-# remain the property of their copyright owners, unless otherwise agreed
-# upon. The license for this file, and modifications and additions to the
-# file, is the same license as for the pristine package itself (unless the
-# license for the pristine package is not an Open Source License, in which
-# case the license is the MIT License). An "Open Source License" is a
-# license that conforms to the Open Source Definition (Version 1.9)
-# published by the Open Source Initiative.
-
-# Please submit bugfixes or comments via http://bugs.opensuse.org/
-#
-
-
+%define keepstatic 1
 Name:           mpc
 Version:        1.0
 Release:        0
@@ -27,7 +10,6 @@ Source:         mpc-%{version}.tar.bz2
 Source2:        baselibs.conf
 BuildRequires:  gmp-devel
 BuildRequires:  mpfr-devel
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
 %description
 MPC is a C library for the arithmetic of complex numbers with
@@ -64,10 +46,8 @@ make check %{?_smp_mflags}
 
 %install
 %make_install
-rm %{buildroot}%{_libdir}/libmpc.la
 
 %post -n libmpc -p /sbin/ldconfig
-
 
 %postun -n libmpc -p /sbin/ldconfig
 
