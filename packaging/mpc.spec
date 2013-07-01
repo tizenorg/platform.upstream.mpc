@@ -8,6 +8,7 @@ Url:            http://www.multiprecision.org/mpc/
 Group:          Development/Libraries/C and C++
 Source:         mpc-%{version}.tar.bz2
 Source2:        baselibs.conf
+Source1001: 	mpc.manifest
 BuildRequires:  gmp-devel
 BuildRequires:  mpfr-devel
 
@@ -36,6 +37,7 @@ MPC multiple-precision complex library development files.
 
 %prep
 %setup -q
+cp %{SOURCE1001} .
 
 %build
 %configure
@@ -53,10 +55,12 @@ make check %{?_smp_mflags}
 
 
 %files -n libmpc
+%manifest %{name}.manifest
 %defattr(-,root,root)
 %{_libdir}/libmpc.so.3*
 
 %files devel
+%manifest %{name}.manifest
 %defattr(-,root,root)
 %doc AUTHORS NEWS COPYING.LESSER
 %doc %{_infodir}/mpc.info.gz
