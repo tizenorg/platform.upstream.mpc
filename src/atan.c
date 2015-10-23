@@ -1,24 +1,24 @@
 /* mpc_atan -- arctangent of a complex number.
 
-Copyright (C) 2009, 2010, 2011, 2012 INRIA
+Copyright (C) 2009 Philippe Th\'eveny, Paul Zimmermann
 
-This file is part of GNU MPC.
+This file is part of the MPC Library.
 
-GNU MPC is free software; you can redistribute it and/or modify it under
-the terms of the GNU Lesser General Public License as published by the
-Free Software Foundation; either version 3 of the License, or (at your
+The MPC Library is free software; you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation; either version 2.1 of the License, or (at your
 option) any later version.
 
-GNU MPC is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
-more details.
+The MPC Library is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with this program. If not, see http://www.gnu.org/licenses/ .
-*/
+along with the MPC Library; see the file COPYING.LIB.  If not, write to
+the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+MA 02111-1307, USA. */
 
-#include <stdio.h>
 #include "mpc-impl.h"
 
 /* set rop to
@@ -53,45 +53,45 @@ mpc_atan (mpc_ptr rop, mpc_srcptr op, mpc_rnd_t rnd)
 
   inex_re = 0;
   inex_im = 0;
-  s_re = mpfr_signbit (mpc_realref (op));
-  s_im = mpfr_signbit (mpc_imagref (op));
+  s_re = mpfr_signbit (MPC_RE (op));
+  s_im = mpfr_signbit (MPC_IM (op));
 
   /* special values */
-  if (mpfr_nan_p (mpc_realref (op)) || mpfr_nan_p (mpc_imagref (op)))
+  if (mpfr_nan_p (MPC_RE (op)) || mpfr_nan_p (MPC_IM (op)))
     {
-      if (mpfr_nan_p (mpc_realref (op)))
+      if (mpfr_nan_p (MPC_RE (op)))
         {
-          mpfr_set_nan (mpc_realref (rop));
-          if (mpfr_zero_p (mpc_imagref (op)) || mpfr_inf_p (mpc_imagref (op)))
+          mpfr_set_nan (MPC_RE (rop));
+          if (mpfr_zero_p (MPC_IM (op)) || mpfr_inf_p (MPC_IM (op)))
             {
-              mpfr_set_ui (mpc_imagref (rop), 0, GMP_RNDN);
+              mpfr_set_ui (MPC_IM (rop), 0, GMP_RNDN);
               if (s_im)
                 mpc_conj (rop, rop, MPC_RNDNN);
             }
           else
-            mpfr_set_nan (mpc_imagref (rop));
+            mpfr_set_nan (MPC_IM (rop));
         }
       else
         {
-          if (mpfr_inf_p (mpc_realref (op)))
+          if (mpfr_inf_p (MPC_RE (op)))
             {
-              inex_re = set_pi_over_2 (mpc_realref (rop), -s_re, MPC_RND_RE (rnd));
-              mpfr_set_ui (mpc_imagref (rop), 0, GMP_RNDN);
+              inex_re = set_pi_over_2 (MPC_RE (rop), -s_re, MPC_RND_RE (rnd));
+              mpfr_set_ui (MPC_IM (rop), 0, GMP_RNDN);
             }
           else
             {
-              mpfr_set_nan (mpc_realref (rop));
-              mpfr_set_nan (mpc_imagref (rop));
+              mpfr_set_nan (MPC_RE (rop));
+              mpfr_set_nan (MPC_IM (rop));
             }
         }
       return MPC_INEX (inex_re, 0);
     }
 
-  if (mpfr_inf_p (mpc_realref (op)) || mpfr_inf_p (mpc_imagref (op)))
+  if (mpfr_inf_p (MPC_RE (op)) || mpfr_inf_p (MPC_IM (op)))
     {
-      inex_re = set_pi_over_2 (mpc_realref (rop), -s_re, MPC_RND_RE (rnd));
+      inex_re = set_pi_over_2 (MPC_RE (rop), -s_re, MPC_RND_RE (rnd));
 
-      mpfr_set_ui (mpc_imagref (rop), 0, GMP_RNDN);
+      mpfr_set_ui (MPC_IM (rop), 0, GMP_RNDN);
       if (s_im)
         mpc_conj (rop, rop, GMP_RNDN);
 
@@ -99,11 +99,11 @@ mpc_atan (mpc_ptr rop, mpc_srcptr op, mpc_rnd_t rnd)
     }
 
   /* pure real argument */
-  if (mpfr_zero_p (mpc_imagref (op)))
+  if (mpfr_zero_p (MPC_IM (op)))
     {
-      inex_re = mpfr_atan (mpc_realref (rop), mpc_realref (op), MPC_RND_RE (rnd));
+      inex_re = mpfr_atan (MPC_RE (rop), MPC_RE (op), MPC_RND_RE (rnd));
 
-      mpfr_set_ui (mpc_imagref (rop), 0, GMP_RNDN);
+      mpfr_set_ui (MPC_IM (rop), 0, GMP_RNDN);
       if (s_im)
         mpc_conj (rop, rop, GMP_RNDN);
 
@@ -111,45 +111,45 @@ mpc_atan (mpc_ptr rop, mpc_srcptr op, mpc_rnd_t rnd)
     }
 
   /* pure imaginary argument */
-  if (mpfr_zero_p (mpc_realref (op)))
+  if (mpfr_zero_p (MPC_RE (op)))
     {
       int cmp_1;
 
       if (s_im)
-        cmp_1 = -mpfr_cmp_si (mpc_imagref (op), -1);
+        cmp_1 = -mpfr_cmp_si (MPC_IM (op), -1);
       else
-        cmp_1 = mpfr_cmp_ui (mpc_imagref (op), +1);
+        cmp_1 = mpfr_cmp_ui (MPC_IM (op), +1);
 
       if (cmp_1 < 0)
         {
           /* atan(+0+iy) = +0 +i*atanh(y), if |y| < 1
              atan(-0+iy) = -0 +i*atanh(y), if |y| < 1 */
 
-          mpfr_set_ui (mpc_realref (rop), 0, GMP_RNDN);
+          mpfr_set_ui (MPC_RE (rop), 0, GMP_RNDN);
           if (s_re)
-            mpfr_neg (mpc_realref (rop), mpc_realref (rop), GMP_RNDN);
+            mpfr_neg (MPC_RE (rop), MPC_RE (rop), GMP_RNDN);
 
-          inex_im = mpfr_atanh (mpc_imagref (rop), mpc_imagref (op), MPC_RND_IM (rnd));
+          inex_im = mpfr_atanh (MPC_IM (rop), MPC_IM (op), MPC_RND_IM (rnd));
         }
       else if (cmp_1 == 0)
         {
           /* atan(+/-0+i) = NaN +i*inf
              atan(+/-0-i) = NaN -i*inf */
-          mpfr_set_nan (mpc_realref (rop));
-          mpfr_set_inf (mpc_imagref (rop), s_im ? -1 : +1);
+          mpfr_set_nan (MPC_RE (rop));
+          mpfr_set_inf (MPC_IM (rop), s_im ? -1 : +1);
         }
       else
         {
           /* atan(+0+iy) = +pi/2 +i*atanh(1/y), if |y| > 1
              atan(-0+iy) = -pi/2 +i*atanh(1/y), if |y| > 1 */
-          mpfr_rnd_t rnd_im, rnd_away;
+          mp_rnd_t rnd_im, rnd_away;
           mpfr_t y;
-          mpfr_prec_t p, p_im;
+          mp_prec_t p, p_im;
           int ok;
 
           rnd_im = MPC_RND_IM (rnd);
           mpfr_init (y);
-          p_im = mpfr_get_prec (mpc_imagref (rop));
+          p_im = mpfr_get_prec (MPC_IM (rop));
           p = p_im;
 
           /* a = o(1/y)      with error(a) < 1 ulp(a)
@@ -165,7 +165,7 @@ mpc_atan (mpc_ptr rop, mpc_srcptr op, mpc_rnd_t rnd)
               p += mpc_ceil_log2 (p) + 2;
               mpfr_set_prec (y, p);
               rnd_away = s_im == 0 ? GMP_RNDU : GMP_RNDD;
-              inex_im = mpfr_ui_div (y, 1, mpc_imagref (op), rnd_away);
+              inex_im = mpfr_ui_div (y, 1, MPC_IM (op), rnd_away);
               /* FIXME: should we consider the case with unreasonably huge
                  precision prec(y)>3*exp_min, where atanh(1/Im(op)) could be
                  representable while 1/Im(op) underflows ?
@@ -180,8 +180,8 @@ mpc_atan (mpc_ptr rop, mpc_srcptr op, mpc_rnd_t rnd)
                                    p_im + (rnd_im == GMP_RNDN));
             } while (ok == 0);
 
-          inex_re = set_pi_over_2 (mpc_realref (rop), -s_re, MPC_RND_RE (rnd));
-          inex_im = mpfr_set (mpc_imagref (rop), y, rnd_im);
+          inex_re = set_pi_over_2 (MPC_RE (rop), -s_re, MPC_RND_RE (rnd));
+          inex_im = mpfr_set (MPC_IM (rop), y, rnd_im);
           mpfr_clear (y);
         }
       return MPC_INEX (inex_re, inex_im);
@@ -190,22 +190,23 @@ mpc_atan (mpc_ptr rop, mpc_srcptr op, mpc_rnd_t rnd)
   /* regular number argument */
   {
     mpfr_t a, b, x, y;
-    mpfr_prec_t prec, p;
-    mpfr_exp_t err, expo;
+    mp_prec_t prec, p;
+    mp_exp_t err, expo;
     int ok = 0;
     mpfr_t minus_op_re;
-    mpfr_exp_t op_re_exp, op_im_exp;
-    mpfr_rnd_t rnd1, rnd2;
+    mp_exp_t op_re_exp;
+    mp_exp_t op_im_exp;
+    mp_rnd_t rnd1, rnd2;
 
-    mpfr_inits2 (MPFR_PREC_MIN, a, b, x, y, (mpfr_ptr) 0);
+    mpfr_inits (a, b, x, y, (mpfr_ptr) 0);
 
     /* real part: Re(arctan(x+i*y)) = [arctan2(x,1-y) - arctan2(-x,1+y)]/2 */
-    minus_op_re[0] = mpc_realref (op)[0];
+    minus_op_re[0] = MPC_RE (op)[0];
     MPFR_CHANGE_SIGN (minus_op_re);
-    op_re_exp = mpfr_get_exp (mpc_realref (op));
-    op_im_exp = mpfr_get_exp (mpc_imagref (op));
+    op_re_exp = MPFR_EXP (MPC_RE (op));
+    op_im_exp = MPFR_EXP (MPC_IM (op));
 
-    prec = mpfr_get_prec (mpc_realref (rop)); /* result precision */
+    prec = mpfr_get_prec (MPC_RE (rop)); /* result precision */
 
     /* a = o(1-y)         error(a) < 1 ulp(a)
        b = o(atan2(x,a))  error(b) < [1+2^{3+Exp(x)-Exp(a)-Exp(b)}] ulp(b)
@@ -224,10 +225,10 @@ mpc_atan (mpc_ptr rop, mpc_srcptr op, mpc_rnd_t rnd)
     */
 
     /* p: working precision */
-    p = (op_im_exp > 0 || prec > SAFE_ABS (mpfr_prec_t, op_im_exp)) ? prec
+    p = (op_im_exp > 0 || prec > SAFE_ABS (mp_prec_t, op_im_exp)) ? prec
       : (prec - op_im_exp);
-    rnd1 = mpfr_sgn (mpc_realref (op)) > 0 ? GMP_RNDD : GMP_RNDU;
-    rnd2 = mpfr_sgn (mpc_realref (op)) < 0 ? GMP_RNDU : GMP_RNDD;
+    rnd1 = mpfr_sgn (MPC_RE (op)) > 0 ? GMP_RNDD : GMP_RNDU;
+    rnd2 = mpfr_sgn (MPC_RE (op)) < 0 ? GMP_RNDU : GMP_RNDD;
 
     do
       {
@@ -239,37 +240,38 @@ mpc_atan (mpc_ptr rop, mpc_srcptr op, mpc_rnd_t rnd)
         /* x = upper bound for atan (x/(1-y)). Since atan is increasing, we
            need an upper bound on x/(1-y), i.e., a lower bound on 1-y for
            x positive, and an upper bound on 1-y for x negative */
-        mpfr_ui_sub (a, 1, mpc_imagref (op), rnd1);
+        mpfr_ui_sub (a, 1, MPC_IM (op), rnd1);
         if (mpfr_sgn (a) == 0) /* y is near 1, thus 1+y is near 2, and
                                   expo will be 1 or 2 below */
           {
-            MPC_ASSERT (mpfr_cmp_ui (mpc_imagref(op), 1) == 0);
-               /* check for intermediate underflow */
+            if (mpfr_cmp_ui (MPC_IM(op), 1) != 0)
+              continue;
             err = 2; /* ensures err will be expo below */
           }
         else
-          err = mpfr_get_exp (a); /* err = Exp(a) with the notations above */
-        mpfr_atan2 (x, mpc_realref (op), a, GMP_RNDU);
+          err = MPFR_EXP (a); /* err = Exp(a) with the notations above */
+        mpfr_atan2 (x, MPC_RE (op), a, GMP_RNDU);
 
         /* b = lower bound for atan (-x/(1+y)): for x negative, we need a
            lower bound on -x/(1+y), i.e., an upper bound on 1+y */
-        mpfr_add_ui (a, mpc_imagref(op), 1, rnd2);
-        /* if a is exactly zero, i.e., Im(op) = -1, then the error on a is 0,
+        mpfr_add_ui (a, MPC_IM(op), 1, rnd2);
+        /* if a is zero but inexact, try again with a larger precision
+           if a is exactly zero, i.e., Im(op) = -1, then the error on a is 0,
            and we can simply ignore the terms involving Exp(a) in the error */
         if (mpfr_sgn (a) == 0)
           {
-            MPC_ASSERT (mpfr_cmp_si (mpc_imagref(op), -1) == 0);
-               /* check for intermediate underflow */
+            if (mpfr_cmp_si (MPC_IM(op), -1) != 0)
+              continue;
             expo = err; /* will leave err unchanged below */
           }
         else
-          expo = mpfr_get_exp (a); /* expo = Exp(c) with the notations above */
+          expo = MPFR_EXP (a); /* expo = Exp(c) with the notations above */
         mpfr_atan2 (b, minus_op_re, a, GMP_RNDD);
 
         err = err < expo ? err : expo; /* err = min(Exp(a),Exp(c)) */
         mpfr_sub (x, x, b, GMP_RNDU);
 
-        err = 5 + op_re_exp - err - mpfr_get_exp (x);
+        err = 5 + op_re_exp - err - MPFR_EXP (x);
         /* error is bounded by [1 + 2^err] ulp(e) */
         err = err < 0 ? 1 : err + 1;
 
@@ -283,7 +285,7 @@ mpc_atan (mpc_ptr rop, mpc_srcptr op, mpc_rnd_t rnd)
 
     /* Imaginary part
        Im(atan(x+I*y)) = 1/4 * [log(x^2+(1+y)^2) - log (x^2 +(1-y)^2)] */
-    prec = mpfr_get_prec (mpc_imagref (rop)); /* result precision */
+    prec = mpfr_get_prec (MPC_IM (rop)); /* result precision */
 
     /* a = o(1+y)    error(a) < 1 ulp(a)
        b = o(a^2)    error(b) < 5 ulp(b)
@@ -304,6 +306,7 @@ mpc_atan (mpc_ptr rop, mpc_srcptr op, mpc_rnd_t rnd)
     */
     err = 2;
     p = prec; /* working precision */
+    rnd1 = mpfr_cmp_si (MPC_IM (op), -1) > 0 ? GMP_RNDU : GMP_RNDD;
 
     do
       {
@@ -313,50 +316,37 @@ mpc_atan (mpc_ptr rop, mpc_srcptr op, mpc_rnd_t rnd)
         mpfr_set_prec (y, p);
 
         /* a = upper bound for log(x^2 + (1+y)^2) */
-        ROUND_AWAY (mpfr_add_ui (a, mpc_imagref (op), 1, MPFR_RNDA), a);
+        mpfr_add_ui (a, MPC_IM (op), 1, rnd1);
         mpfr_sqr (a, a, GMP_RNDU);
-        mpfr_sqr (y, mpc_realref (op), GMP_RNDU);
+        mpfr_sqr (y, MPC_RE (op), GMP_RNDU);
         mpfr_add (a, a, y, GMP_RNDU);
         mpfr_log (a, a, GMP_RNDU);
 
         /* b = lower bound for log(x^2 + (1-y)^2) */
-        mpfr_ui_sub (b, 1, mpc_imagref (op), GMP_RNDZ); /* round to zero */
-        mpfr_sqr (b, b, GMP_RNDZ);
-        /* we could write mpfr_sqr (y, mpc_realref (op), GMP_RNDZ) but it is
-           more efficient to reuse the value of y (x^2) above and subtract
-           one ulp */
+        mpfr_ui_sub (b, 1, MPC_IM (op), GMP_RNDZ);
+        mpfr_sqr (b, b, GMP_RNDU);
+        /* mpfr_sqr (y, MPC_RE (op), GMP_RNDZ); */
         mpfr_nextbelow (y);
         mpfr_add (b, b, y, GMP_RNDZ);
         mpfr_log (b, b, GMP_RNDZ);
 
         mpfr_sub (y, a, b, GMP_RNDU);
 
-        if (mpfr_zero_p (y))
-           /* FIXME: happens when x and y have very different magnitudes;
-              could be handled more efficiently                           */
-          ok = 0;
+        expo = MPFR_EXP (a) < MPFR_EXP (b) ? MPFR_EXP (b) : MPFR_EXP (a);
+        expo = expo - MPFR_EXP (y) + 1;
+        err = 3 - MPFR_EXP (y);
+        /* error(j) <= [1 + 2^expo + 7*2^err] ulp(j) */
+        if (expo <= err) /* error(j) <= [1 + 2^{err+1}] ulp(j) */
+          err = (err < 0) ? 1 : err + 2;
         else
-          {
-            expo = MPC_MAX (mpfr_get_exp (a), mpfr_get_exp (b));
-            expo = expo - mpfr_get_exp (y) + 1;
-            err = 3 - mpfr_get_exp (y);
-            /* error(j) <= [1 + 2^expo + 7*2^err] ulp(j) */
-            if (expo <= err) /* error(j) <= [1 + 2^{err+1}] ulp(j) */
-              err = (err < 0) ? 1 : err + 2;
-            else
-              err = (expo < 0) ? 1 : expo + 2;
+          err = (expo < 0) ? 1 : expo + 2;
 
-            mpfr_div_2ui (y, y, 2, GMP_RNDN);
-            MPC_ASSERT (!mpfr_zero_p (y));
-               /* FIXME: underflow. Since the main term of the Taylor series
-                  in y=0 is 1/(x^2+1) * y, this means that y is very small
-                  and/or x very large; but then the mpfr_zero_p (y) above
-                  should be true. This needs a proof, or better yet,
-                  special code.                                              */
+        mpfr_div_2ui (y, y, 2, GMP_RNDN);
+        if (mpfr_zero_p (y))
+          err = 2; /* underflow */
 
-            ok = mpfr_can_round (y, p - err, GMP_RNDU, GMP_RNDD,
-                                 prec + (MPC_RND_IM (rnd) == GMP_RNDN));
-          }
+        ok = mpfr_can_round (y, p - err, GMP_RNDU, GMP_RNDD,
+                             prec + (MPC_RND_IM (rnd) == GMP_RNDN));
       } while (ok == 0);
 
     inex = mpc_set_fr_fr (rop, x, y, rnd);
